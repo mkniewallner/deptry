@@ -19,8 +19,20 @@ jobs:
       - name: Set up the environment
         uses: ./.github/actions/setup-poetry-env
 
-      - name: Run checks
-        uses: ./.github/actions/run-checks
+      - name: Run pre-commit
+        run: poetry run pre-commit run -a
+
+      - name: Test with pytest
+        run: make test
+
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v3
+
+      - name: Check lock file consistency
+        run: poetry lock --check
+
+      - name: Inspect dependencies
+        run: poetry run deptry .
 
   tox:
     runs-on: ubuntu-latest
