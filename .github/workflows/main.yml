@@ -32,6 +32,9 @@ jobs:
       - name: Inspect dependencies
         run: poetry run deptry .
 
+      - name: Check that docs can be built
+        run: make docs-test
+
   tox:
     runs-on: ubuntu-latest
     strategy:
@@ -63,12 +66,3 @@ jobs:
 
       - name: Test with tox
         run: tox
-
-  check-docs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out
-        uses: actions/checkout@v3
-
-      - name: check documentation
-        uses: ./.github/actions/check-docs
