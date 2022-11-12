@@ -12,8 +12,6 @@ runs:
     # from: https://github.com/snok/install-poetry
     #       check-out repo and set-up python
     #----------------------------------------------
-    - name: Check out repository
-      uses: actions/checkout@v3
     - name: Set up python
       uses: actions/setup-python@v4
       with:

@@ -17,6 +17,11 @@ jobs:
       - name: Set up the environment
         uses: ./.github/actions/setup-poetry-env
 
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
       - name: Run pre-commit
         run: poetry run pre-commit run -a
 
