@@ -45,6 +45,9 @@ jobs:
           - os: Windows
             image: windows-2022
       fail-fast: false
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Check out
         uses: actions/checkout@v3
@@ -56,6 +59,10 @@ jobs:
 
       - name: Set up the environment
         uses: ./.github/actions/setup-poetry-env
+
+      - name: Export Poetry path on Windows
+        run: echo "${HOME}/.local/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        if: ${{ matrix.os == 'Windows' }}
 
       - name: Run tests
         run: poetry run pytest tests --cov --cov-config=pyproject.toml --cov-report=xml
