@@ -19,6 +19,16 @@ runs:
       run: curl -sSL https://install.python-poetry.org | python - -y
       shell: bash
 
+    - name: Add Poetry to Path
+      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+      if: ${{ matrix.os != 'Windows' }}
+      shell: bash
+
+    - name: Add Poetry to Path
+      run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
+      if: ${{ matrix.os == 'Windows' }}
+      shell: bash
+
     - run: poetry config virtualenvs.in-project true
       shell: bash
 
