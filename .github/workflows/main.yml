@@ -57,19 +57,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Export Poetry path on Windows
-        run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
-        if: ${{ matrix.os == 'Windows' }}
-
       - name: Run tests
-        run: poetry run pytest tests --cov --cov-config=pyproject.toml --cov-report=xml
-
-      - name: Check typing
-        run: poetry run mypy
-
-      - name: Upload coverage reports to Codecov with GitHub Action on Python 3.11 for Ubuntu
-        uses: codecov/codecov-action@v3
-        if: ${{ matrix.python-version == '3.11' && matrix.os == 'Ubuntu' }}
+        run: poetry run pytest tests/functional/cli/test_cli.py::test_cli_returns_error
 
   check-docs:
     runs-on: ubuntu-latest

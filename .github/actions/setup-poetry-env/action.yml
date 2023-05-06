@@ -16,9 +16,11 @@ runs:
         python-version: ${{ inputs.python-version }}
 
     - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        virtualenvs-in-project: true
+      run: curl -sSL https://install.python-poetry.org | python - -y
+      shell: bash
+
+    - run: poetry config virtualenvs.in-project true
+      shell: bash
 
     - name: Load cached venv
       id: cached-poetry-dependencies
