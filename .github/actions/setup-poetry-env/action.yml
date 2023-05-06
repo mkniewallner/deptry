@@ -16,6 +16,9 @@ runs:
         python-version: ${{ inputs.python-version }}
 
     - name: Install Poetry
+      env:
+        # renovate: datasource=pypi depName=poetry
+        POETRY_VERSION: "1.4.2"
       run: curl -sSL https://install.python-poetry.org | python - -y
       shell: bash
 
