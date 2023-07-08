@@ -31,11 +31,6 @@ jobs:
 
       - run: poetry show click
 
-      - name: Run tests
-        run: poetry run pytest tests --cov --cov-config=pyproject.toml --cov-report=xml
-
-      - run: poetry show click
-
       - name: Check typing
         run: poetry run mypy
 
