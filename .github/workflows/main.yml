@@ -29,8 +29,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - run: poetry show
+
       - name: Run tests
         run: poetry run pytest tests --cov --cov-config=pyproject.toml --cov-report=xml
+
+      - run: poetry show
 
       - name: Check typing
         run: poetry run mypy
