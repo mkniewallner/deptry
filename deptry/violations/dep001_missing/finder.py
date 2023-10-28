@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from deptry.compat.typing import override
 from deptry.violations.base import ViolationsFinder
 from deptry.violations.dep001_missing.violation import DEP001MissingDependencyViolation
 
@@ -18,6 +19,7 @@ class DEP001MissingDependenciesFinder(ViolationsFinder):
     Given a list of imported modules and a list of project dependencies, determine which ones are missing.
     """
 
+    @override
     def find(self) -> list[Violation]:
         logging.debug("\nScanning for missing dependencies...")
         missing_dependencies: list[Violation] = []

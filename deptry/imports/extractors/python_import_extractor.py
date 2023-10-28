@@ -5,6 +5,7 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from deptry.compat.typing import override
 from deptry.imports.extractors.base import ImportExtractor
 
 if TYPE_CHECKING:
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 class PythonImportExtractor(ImportExtractor):
     """Extract import statements from a Python module."""
 
+    @override
     def extract_imports(self) -> dict[str, list[Location]]:
         """Extract all imported top-level modules from the Python file."""
         try:

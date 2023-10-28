@@ -4,6 +4,7 @@ import contextlib
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from deptry.compat.typing import override
 from deptry.dependency import Dependency
 from deptry.dependency_getter.base import DependenciesExtract, DependencyGetter
 from deptry.utils import load_pyproject_toml
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
 class PoetryDependencyGetter(DependencyGetter):
     """Extract Poetry dependencies from pyproject.toml."""
 
+    @override
     def get(self) -> DependenciesExtract:
         dependencies = self._get_poetry_dependencies()
         self._log_dependencies(dependencies)

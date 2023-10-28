@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
+from deptry.compat.typing import override
 from deptry.violations.base import Violation
 
 if TYPE_CHECKING:
@@ -15,5 +16,6 @@ class DEP002UnusedDependencyViolation(Violation):
     error_template: ClassVar[str] = "'{name}' defined as a dependency but not used in the codebase"
     issue: Dependency
 
+    @override
     def get_error_message(self) -> str:
         return self.error_template.format(name=self.issue.name)

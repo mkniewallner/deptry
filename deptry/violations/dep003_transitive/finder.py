@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from deptry.compat.typing import override
 from deptry.violations.base import ViolationsFinder
 from deptry.violations.dep003_transitive.violation import DEP003TransitiveDependencyViolation
 
@@ -25,6 +26,7 @@ class DEP003TransitiveDependenciesFinder(ViolationsFinder):
     Then it must be a transitive dependency.
     """
 
+    @override
     def find(self) -> list[Violation]:
         logging.debug("\nScanning for transitive dependencies...")
         transitive_dependencies: list[Violation] = []

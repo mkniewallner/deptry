@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from deptry.compat.typing import override
 from deptry.imports.location import Location
 from deptry.violations.base import ViolationsFinder
 from deptry.violations.dep002_unused.violation import DEP002UnusedDependencyViolation
@@ -27,6 +28,7 @@ class DEP002UnusedDependenciesFinder(ViolationsFinder):
     even if `matplotlib` itself is not imported anywhere.
     """
 
+    @override
     def find(self) -> list[Violation]:
         logging.debug("\nScanning for unused dependencies...")
         unused_dependencies: list[Violation] = []

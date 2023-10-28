@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from deptry.compat.typing import override
 from deptry.dependency_getter.base import DependenciesExtract
 from deptry.dependency_getter.pep_621 import PEP621DependencyGetter
 from deptry.utils import load_pyproject_toml
@@ -18,6 +19,7 @@ class PDMDependencyGetter(PEP621DependencyGetter):
     Class to get dependencies that are specified according to PEP 621 from a `pyproject.toml` file for a project that uses PDM for its dependency management.
     """
 
+    @override
     def get(self) -> DependenciesExtract:
         pep_621_dependencies_extract = super().get()
 

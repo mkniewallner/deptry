@@ -5,6 +5,7 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from deptry.compat.typing import override
 from deptry.dependency import Dependency
 from deptry.dependency_getter.base import DependenciesExtract, DependencyGetter
 from deptry.utils import load_pyproject_toml
@@ -37,6 +38,7 @@ class PEP621DependencyGetter(DependencyGetter):
     a recommended way to extract development dependencies, we do not attempt to extract any from the pyproject.toml file.
     """
 
+    @override
     def get(self) -> DependenciesExtract:
         dependencies = [*self._get_dependencies(), *itertools.chain(*self._get_optional_dependencies().values())]
         self._log_dependencies(dependencies)

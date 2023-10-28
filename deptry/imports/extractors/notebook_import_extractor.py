@@ -8,6 +8,7 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from deptry.compat.typing import override
 from deptry.imports.extractors.base import ImportExtractor
 
 if TYPE_CHECKING:
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
 class NotebookImportExtractor(ImportExtractor):
     """Extract import statements from a Jupyter notebook."""
 
+    @override
     def extract_imports(self) -> dict[str, list[Location]]:
         """Extract the imported top-level modules from all code cells in the Jupyter Notebook."""
         notebook = self._read_ipynb_file(self.file)

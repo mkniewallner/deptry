@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 import click
 
+from deptry.compat.typing import override
 from deptry.config import read_configuration_from_pyproject_toml
 from deptry.core import Core
 from deptry.deprecate.ignore_flags import get_value_for_per_rule_ignores_argument
@@ -34,6 +35,7 @@ class CommaSeparatedTupleParamType(click.ParamType):
 
     name = "tuple"
 
+    @override
     def convert(
         self,
         value: str | list[str] | tuple[str, ...],
@@ -61,6 +63,7 @@ class CommaSeparatedMappingParamType(click.ParamType):
 
     name = "mapping"
 
+    @override
     def convert(
         self,
         # In the mapping value below, although a str is a Sequence[str] itself,

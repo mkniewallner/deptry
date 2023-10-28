@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from deptry.compat.typing import override
 from deptry.reporters.base import Reporter
 
 if TYPE_CHECKING:
@@ -25,6 +26,7 @@ COLORS_NOOP = {color: "" for color in COLORS}
 class TextReporter(Reporter):
     use_ansi: bool = True
 
+    @override
     def report(self) -> None:
         self._log_and_exit()
 

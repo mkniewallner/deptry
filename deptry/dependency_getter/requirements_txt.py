@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Match
 
+from deptry.compat.typing import override
 from deptry.dependency import Dependency
 from deptry.dependency_getter.base import DependenciesExtract, DependencyGetter
 
@@ -19,6 +20,7 @@ class RequirementsTxtDependencyGetter(DependencyGetter):
     requirements_txt: tuple[str, ...] = ("requirements.txt",)
     requirements_txt_dev: tuple[str, ...] = ("dev-requirements.txt", "requirements-dev.txt")
 
+    @override
     def get(self) -> DependenciesExtract:
         dependencies = list(
             itertools.chain(

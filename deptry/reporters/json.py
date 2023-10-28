@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from deptry.compat.typing import override
 from deptry.reporters.base import Reporter
 
 if TYPE_CHECKING:
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 class JSONReporter(Reporter):
     json_output: str
 
+    @override
     def report(self) -> None:
         output: list[dict[str, str | dict[str, Any]]] = []
 

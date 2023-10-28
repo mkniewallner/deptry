@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from deptry.compat.typing import override
 from deptry.violations.base import ViolationsFinder
 from deptry.violations.dep004_misplaced_dev.violation import DEP004MisplacedDevDependencyViolation
 
@@ -21,6 +22,7 @@ class DEP004MisplacedDevDependenciesFinder(ViolationsFinder):
     This is the case for any development dependency encountered, since files solely used for development purposes should be excluded from scanning.
     """
 
+    @override
     def find(self) -> list[Violation]:
         """
         In this function, we use 'corresponding_package_name' instead of module.package, since it can happen that a
