@@ -5,19 +5,15 @@ from pathlib import Path
 import pytest
 
 from deptry.python_file_finder import get_all_python_files_in
-from tests.utils import create_files, run_within_dir
+from tests.utils import run_within_dir
 
 
-def test_simple(tmp_path: Path) -> None:
-    with run_within_dir(tmp_path):
-        create_files([
-            Path("dir/subdir/file1.py"),
-            Path("dir/subdir/file2.py"),
-            Path("dir/subdir/file3.py"),
-            Path("other_dir/subdir/file1.py"),
-            Path("other_dir/subdir/file2.py"),
-        ])
+def _get_test_data_directory() -> Path:
+    return Path.cwd() / "tests/data/file_finder"
 
+
+def test_simple() -> None:
+    with run_within_dir(_get_test_data_directory()):
         files = get_all_python_files_in(
             (Path(),),
             exclude=(".venv",),
@@ -26,33 +22,35 @@ def test_simple(tmp_path: Path) -> None:
         )
 
         assert sorted(files) == [
-            Path("dir/subdir/file1.py"),
-            Path("dir/subdir/file2.py"),
-            Path("dir/subdir/file3.py"),
-        ]
-
-
-def test_only_matches_start(tmp_path: Path) -> None:
-    """
-    Test that adding 'subdir' as exclude argument does not also exclude dir/subdir.
-    """
-    with run_within_dir(tmp_path):
-        create_files([
+            Path(".cache/file1.py"),
+            Path(".cache/file2.py"),
+            Path("another_dir/subdir/file1.py"),
+            Path("dir/subdir/file1.ipynb"),
             Path("dir/subdir/file1.py"),
             Path("dir/subdir/file2.py"),
             Path("dir/subdir/file3.py"),
             Path("subdir/file1.py"),
-            Path("subdir/file2.py"),
-        ])
+        ]
 
+
+def test_only_matches_start() -> None:
+    """
+    Test that adding 'subdir' as exclude argument does not also exclude dir/subdir.
+    """
+    with run_within_dir(_get_test_data_directory()):
         files = get_all_python_files_in(
             (Path(),), exclude=("foo",), extend_exclude=("subdir",), using_default_exclude=False
         )
 
         assert sorted(files) == [
+            Path(".cache/file1.py"),
+            Path(".cache/file2.py"),
+            Path("another_dir/subdir/file1.py"),
+            Path("dir/subdir/file1.ipynb"),
             Path("dir/subdir/file1.py"),
             Path("dir/subdir/file2.py"),
             Path("dir/subdir/file3.py"),
+            Path("other_dir/subdir/file1.py"),
         ]
 
 
@@ -61,18 +59,35 @@ def test_only_matches_start(tmp_path: Path) -> None:
     [
         (
             False,
-            [Path("dir/subdir/file1.ipynb")],
+            [
+                Path(".cache/file1.py"),
+                Path(".cache/file2.py"),
+                Path("another_dir/subdir/file1.py"),
+                Path("dir/subdir/file1.ipynb"),
+                Path("dir/subdir/file1.py"),
+                Path("dir/subdir/file2.py"),
+                Path("dir/subdir/file3.py"),
+                Path("other_dir/subdir/file1.py"),
+                Path("subdir/file1.py"),
+            ],
         ),
         (
             True,
-            [],
+            [
+                Path(".cache/file1.py"),
+                Path(".cache/file2.py"),
+                Path("another_dir/subdir/file1.py"),
+                Path("dir/subdir/file1.py"),
+                Path("dir/subdir/file2.py"),
+                Path("dir/subdir/file3.py"),
+                Path("other_dir/subdir/file1.py"),
+                Path("subdir/file1.py"),
+            ],
         ),
     ],
 )
-def test_matches_ipynb(ignore_notebooks: bool, expected: list[Path], tmp_path: Path) -> None:
-    with run_within_dir(tmp_path):
-        create_files([Path("dir/subdir/file1.ipynb")])
-
+def test_matches_ipynb(ignore_notebooks: bool, expected: list[Path]) -> None:
+    with run_within_dir(_get_test_data_directory()):
         files = get_all_python_files_in(
             (Path(),), exclude=(), extend_exclude=(), using_default_exclude=False, ignore_notebooks=ignore_notebooks
         )
@@ -89,15 +104,17 @@ def test_matches_ipynb(ignore_notebooks: bool, expected: list[Path], tmp_path: P
                 Path(".cache/file2.py"),
                 Path("dir/subdir/file2.py"),
                 Path("dir/subdir/file3.py"),
-                Path("other_dir/subdir/file2.py"),
             ],
         ),
         (
             (".cache|other.*subdir",),
             [
+                Path("another_dir/subdir/file1.py"),
+                Path("dir/subdir/file1.ipynb"),
                 Path("dir/subdir/file1.py"),
                 Path("dir/subdir/file2.py"),
                 Path("dir/subdir/file3.py"),
+                Path("subdir/file1.py"),
             ],
         ),
         (
@@ -105,22 +122,13 @@ def test_matches_ipynb(ignore_notebooks: bool, expected: list[Path], tmp_path: P
             [
                 Path(".cache/file1.py"),
                 Path(".cache/file2.py"),
+                Path("subdir/file1.py"),
             ],
         ),
     ],
 )
-def test_regex_argument(exclude: tuple[str], expected: list[Path], tmp_path: Path) -> None:
-    with run_within_dir(tmp_path):
-        create_files([
-            Path(".cache/file1.py"),
-            Path(".cache/file2.py"),
-            Path("dir/subdir/file1.py"),
-            Path("dir/subdir/file2.py"),
-            Path("dir/subdir/file3.py"),
-            Path("other_dir/subdir/file1.py"),
-            Path("other_dir/subdir/file2.py"),
-        ])
-
+def test_regex_argument(exclude: tuple[str], expected: list[Path]) -> None:
+    with run_within_dir(_get_test_data_directory()):
         files = get_all_python_files_in((Path(),), exclude=exclude, extend_exclude=(), using_default_exclude=False)
 
         assert sorted(files) == expected
@@ -134,14 +142,11 @@ def test_regex_argument(exclude: tuple[str], expected: list[Path], tmp_path: Pat
             [
                 Path("dir/subdir/file2.py"),
                 Path("dir/subdir/file3.py"),
-                Path("other_dir/subdir/file2.py"),
             ],
         ),
         (
             (".*file1|.*file2",),
-            [
-                Path("dir/subdir/file3.py"),
-            ],
+            [Path("dir/subdir/file3.py")],
         ),
         (
             (".*/subdir/",),
@@ -149,17 +154,8 @@ def test_regex_argument(exclude: tuple[str], expected: list[Path], tmp_path: Pat
         ),
     ],
 )
-def test_multiple_source_directories(exclude: tuple[str], expected: list[Path], tmp_path: Path) -> None:
-    with run_within_dir(tmp_path):
-        create_files([
-            Path("dir/subdir/file1.py"),
-            Path("dir/subdir/file2.py"),
-            Path("dir/subdir/file3.py"),
-            Path("other_dir/subdir/file1.py"),
-            Path("other_dir/subdir/file2.py"),
-            Path("another_dir/subdir/file1.py"),
-        ])
-
+def test_multiple_source_directories(exclude: tuple[str], expected: list[Path]) -> None:
+    with run_within_dir(_get_test_data_directory()):
         files = get_all_python_files_in(
             (Path("dir"), Path("other_dir")), exclude=exclude, extend_exclude=(), using_default_exclude=False
         )
@@ -167,10 +163,18 @@ def test_multiple_source_directories(exclude: tuple[str], expected: list[Path], 
         assert sorted(files) == expected
 
 
-def test_duplicates_are_removed(tmp_path: Path) -> None:
-    with run_within_dir(tmp_path):
-        create_files([Path("dir/subdir/file1.py")])
-
+def test_duplicates_are_removed() -> None:
+    with run_within_dir(_get_test_data_directory()):
         files = get_all_python_files_in((Path(), Path()), exclude=(), extend_exclude=(), using_default_exclude=False)
 
-        assert sorted(files) == [Path("dir/subdir/file1.py")]
+        assert sorted(files) == [
+            Path(".cache/file1.py"),
+            Path(".cache/file2.py"),
+            Path("another_dir/subdir/file1.py"),
+            Path("dir/subdir/file1.ipynb"),
+            Path("dir/subdir/file1.py"),
+            Path("dir/subdir/file2.py"),
+            Path("dir/subdir/file3.py"),
+            Path("other_dir/subdir/file1.py"),
+            Path("subdir/file1.py"),
+        ]
