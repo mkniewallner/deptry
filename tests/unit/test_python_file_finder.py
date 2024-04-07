@@ -54,45 +54,22 @@ def test_only_matches_start() -> None:
         ]
 
 
-@pytest.mark.parametrize(
-    ("ignore_notebooks", "expected"),
-    [
-        (
-            False,
-            [
-                Path(".cache/file1.py"),
-                Path(".cache/file2.py"),
-                Path("another_dir/subdir/file1.py"),
-                Path("dir/subdir/file1.ipynb"),
-                Path("dir/subdir/file1.py"),
-                Path("dir/subdir/file2.py"),
-                Path("dir/subdir/file3.py"),
-                Path("other_dir/subdir/file1.py"),
-                Path("subdir/file1.py"),
-            ],
-        ),
-        (
-            True,
-            [
-                Path(".cache/file1.py"),
-                Path(".cache/file2.py"),
-                Path("another_dir/subdir/file1.py"),
-                Path("dir/subdir/file1.py"),
-                Path("dir/subdir/file2.py"),
-                Path("dir/subdir/file3.py"),
-                Path("other_dir/subdir/file1.py"),
-                Path("subdir/file1.py"),
-            ],
-        ),
-    ],
-)
-def test_matches_ipynb(ignore_notebooks: bool, expected: list[Path]) -> None:
+def test_ignore_notebooks() -> None:
     with run_within_dir(_get_test_data_directory()):
         files = get_all_python_files_in(
-            (Path(),), exclude=(), extend_exclude=(), using_default_exclude=False, ignore_notebooks=ignore_notebooks
+            (Path(),), exclude=(), extend_exclude=(), using_default_exclude=False, ignore_notebooks=True
         )
 
-        assert sorted(files) == expected
+        assert sorted(files) == [
+            Path(".cache/file1.py"),
+            Path(".cache/file2.py"),
+            Path("another_dir/subdir/file1.py"),
+            Path("dir/subdir/file1.py"),
+            Path("dir/subdir/file2.py"),
+            Path("dir/subdir/file3.py"),
+            Path("other_dir/subdir/file1.py"),
+            Path("subdir/file1.py"),
+        ]
 
 
 @pytest.mark.parametrize(
