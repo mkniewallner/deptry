@@ -91,3 +91,223 @@ fn entry_satisfies_predicate(entry: &DirEntry, regex: Option<&Regex>) -> bool {
         .unwrap()
         .is_match(path_str.strip_prefix("./").unwrap_or(&path_str).as_ref())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rstest::rstest;
+    use std::env;
+    use std::path::Path;
+
+    fn get_test_data_directory() -> &'static Path {
+        Path::new(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/tests/data/file_finder"
+        ))
+    }
+
+    fn py_object_to_sorted_vec_string(py: Python, py_object: PyObject) -> Vec<String> {
+        let mut list: Vec<String> = py_object.extract(py).unwrap();
+        list.sort();
+        list
+    }
+
+    #[test]
+    fn test_simple() {
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            env::set_current_dir(get_test_data_directory()).unwrap();
+
+            let result = find_python_files(
+                py,
+                vec![PathBuf::from("./")],
+                vec![".venv"],
+                vec!["other_dir"],
+                false,
+                false,
+            )
+            .unwrap();
+
+            assert_eq!(
+                py_object_to_sorted_vec_string(py, result),
+                vec![
+                    ".cache/file1.py",
+                    ".cache/file2.py",
+                    "another_dir/subdir/file1.py",
+                    "dir/subdir/file1.ipynb",
+                    "dir/subdir/file1.py",
+                    "dir/subdir/file2.py",
+                    "dir/subdir/file3.py",
+                    "subdir/file1.py",
+                ],
+            );
+        })
+    }
+
+    #[test]
+    fn test_only_matches_start() {
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            env::set_current_dir(get_test_data_directory()).unwrap();
+
+            let result = find_python_files(
+                py,
+                vec![PathBuf::from("./")],
+                vec!["foo"],
+                vec!["subdir"],
+                false,
+                false,
+            )
+            .unwrap();
+
+            assert_eq!(
+                py_object_to_sorted_vec_string(py, result),
+                vec![
+                    ".cache/file1.py",
+                    ".cache/file2.py",
+                    "another_dir/subdir/file1.py",
+                    "dir/subdir/file1.ipynb",
+                    "dir/subdir/file1.py",
+                    "dir/subdir/file2.py",
+                    "dir/subdir/file3.py",
+                    "other_dir/subdir/file1.py",
+                ],
+            );
+        })
+    }
+
+    #[test]
+    fn test_ignores_notebooks() {
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            env::set_current_dir(get_test_data_directory()).unwrap();
+
+            let result =
+                find_python_files(py, vec![PathBuf::from("./")], vec![], vec![], false, true)
+                    .unwrap();
+
+            assert_eq!(
+                py_object_to_sorted_vec_string(py, result),
+                vec![
+                    ".cache/file1.py",
+                    ".cache/file2.py",
+                    "another_dir/subdir/file1.py",
+                    "dir/subdir/file1.py",
+                    "dir/subdir/file2.py",
+                    "dir/subdir/file3.py",
+                    "other_dir/subdir/file1.py",
+                    "subdir/file1.py",
+                ],
+            );
+        })
+    }
+
+    #[rstest]
+    #[case(
+        vec![".*file1"],
+        vec![
+            ".cache/file2.py",
+            "dir/subdir/file2.py",
+            "dir/subdir/file3.py",
+        ],
+    )]
+    #[case(
+        vec![".cache|other.*subdir"],
+        vec![
+            "another_dir/subdir/file1.py",
+            "dir/subdir/file1.ipynb",
+            "dir/subdir/file1.py",
+            "dir/subdir/file2.py",
+            "dir/subdir/file3.py",
+            "subdir/file1.py",
+        ],
+    )]
+    #[case(
+        vec![".*/subdir/"],
+        vec![
+            ".cache/file1.py",
+            ".cache/file2.py",
+            "subdir/file1.py",
+        ],
+    )]
+    fn test_regex_argument(#[case] exclude: Vec<&str>, #[case] expected: Vec<&str>) {
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            env::set_current_dir(get_test_data_directory()).unwrap();
+
+            let result =
+                find_python_files(py, vec![PathBuf::from("./")], exclude, vec![], false, false)
+                    .unwrap();
+
+            assert_eq!(py_object_to_sorted_vec_string(py, result), expected);
+        })
+    }
+
+    #[rstest]
+    #[case(
+        vec![".*file1"],
+        vec![
+            "dir/subdir/file2.py",
+            "dir/subdir/file3.py",
+        ],
+    )]
+    #[case(
+        vec![".*file1|.*file2"],
+        vec!["dir/subdir/file3.py"],
+    )]
+    #[case(
+        vec![".*/subdir/"],
+        vec![],
+    )]
+    fn test_multiple_source_directories(#[case] exclude: Vec<&str>, #[case] expected: Vec<&str>) {
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            env::set_current_dir(get_test_data_directory()).unwrap();
+
+            let result = find_python_files(
+                py,
+                vec![PathBuf::from("./dir"), PathBuf::from("./other_dir")],
+                exclude,
+                vec![],
+                false,
+                false,
+            )
+            .unwrap();
+
+            assert_eq!(py_object_to_sorted_vec_string(py, result), expected);
+        })
+    }
+
+    #[test]
+    fn test_duplicates_are_removed() {
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            env::set_current_dir(get_test_data_directory()).unwrap();
+
+            let result = find_python_files(
+                py,
+                vec![PathBuf::from("./"), PathBuf::from("./")],
+                vec![],
+                vec![],
+                false,
+                false,
+            )
+            .unwrap();
+
+            assert_eq!(
+                py_object_to_sorted_vec_string(py, result),
+                vec![
+                    ".cache/file1.py",
+                    ".cache/file2.py",
+                    "another_dir/subdir/file1.py",
+                    "dir/subdir/file1.ipynb",
+                    "dir/subdir/file1.py",
+                    "dir/subdir/file2.py",
+                    "dir/subdir/file3.py",
+                    "other_dir/subdir/file1.py",
+                    "subdir/file1.py",
+                ],
+            );
+        })
+    }
+}

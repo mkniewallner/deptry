@@ -24,6 +24,9 @@ ruff_source_file = { git = "https://github.com/astral-sh/ruff", tag = "v0.4.2" }
 ruff_text_size = { git = "https://github.com/astral-sh/ruff", tag = "v0.4.2" }
 serde_json = "1.0.116"
 
+[dev-dependencies]
+rstest = "0.19.0"
+
 [profile.release]
 lto = true
 codegen-units = 1
