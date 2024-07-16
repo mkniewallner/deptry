@@ -1,5 +1,5 @@
 name: 'Setup Python and Rust Environment'
-description: 'Set up Python and Rust environment for PDM projects with matrix support'
+description: 'Set up Python and Rust environment for the given Python version and architecture'
 
 inputs:
   python-version:
@@ -14,20 +14,19 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Install PDM
-      uses: pdm-project/setup-pdm@v4
-      env:
-        # renovate: datasource=pypi depName=pdm
-        PDM_VERSION: "2.16.1"
+    - uses: actions/setup-python@v5
       with:
-        version: ${{ env.PDM_VERSION }}
         python-version: ${{ inputs.python-version }}
-        cache: true
+
+    - name: Install uv
+      run: pipx install uv
+      env:
+        # renovate: datasource=pypi depName=uv
+        UV_VERSION: "0.2.25"
+      shell: bash
 
     - name: Install Python dependencies
-      run: pdm install --frozen-lockfile --no-editable
-      env:
-        PDM_VENV_WITH_PIP: "true"
+      run: uv sync --frozen
       shell: bash
 
     - name: Build and install the project using Maturin
