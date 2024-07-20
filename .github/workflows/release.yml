@@ -55,7 +55,12 @@ jobs:
         with:
           name: pyproject-toml
 
-      - name: Build wheels
+      - uses: actions/setup-python@v5
+        id: setup-python
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Build wheel
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
@@ -63,7 +68,7 @@ jobs:
           sccache: 'true'
           manylinux: auto
 
-      - name: Upload wheels
+      - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
           name: artifact-wheel-${{ matrix.os.name }}-${{ matrix.target }}-${{ matrix.python }}
