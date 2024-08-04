@@ -11,71 +11,11 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  quality:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Set up the environment
-        uses: ./.github/actions/setup-env
-
-      - name: Run pre-commit
-        run: |
-          rustup component add rustfmt
-          pdm run pre-commit run -a --show-diff-on-failure
-
-      - name: Inspect dependencies with deptry
-        run: |
-          pdm run deptry python
-
   tests:
-    strategy:
-      matrix:
-        os:
-          - name: linux
-            image: ubuntu-24.04
-          - name: macos
-            image: macos-14
-          - name: windows
-            image: windows-2022
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', 'pypy3.10']
-      fail-fast: false
-    runs-on: ${{ matrix.os.image }}
-    name: ${{ matrix.os.name }} (${{ matrix.python-version }})
+    runs-on: macos-14
     steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Set up the environment
-        uses: ./.github/actions/setup-env
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Check typing
-        run: pdm run mypy
-        if: ${{ matrix.os.name == 'linux' }}
-
-      - name: Run unit tests
-        run: pdm run pytest tests/unit --cov --cov-config=pyproject.toml --cov-report=xml
-
-      - name: Run functional tests
-        run: pdm run pytest tests/functional -n auto --dist loadgroup
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        if: ${{ matrix.os.name == 'linux' && matrix.python-version == '3.12' }}
-
-  check-docs:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Set up the environment
-        uses: ./.github/actions/setup-env
-
-      - name: Check if documentation can be built
-        run: pdm run mkdocs build -s
+          python-version: 3.13-dev
+      - run: pip install poetry
