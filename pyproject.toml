@@ -40,6 +40,7 @@ test = [
     "pdm==2.22.2",
     "poetry==2.0.0",
     "pytest==8.3.4",
+    "pytest-codspeed==3.1.2",
     "pytest-cov==6.0.0",
     "pytest-xdist[psutil]==3.6.1",
 ]
