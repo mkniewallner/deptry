@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
+import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -44,6 +45,7 @@ class Core:
     experimental_namespace_package: bool
 
     def run(self) -> None:
+        time.sleep(2)
         self._log_config()
 
         dependency_getter = DependencyGetterBuilder(
